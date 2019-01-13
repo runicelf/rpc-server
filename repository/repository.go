@@ -42,37 +42,23 @@ func (r Repository) Add(login string) (string, error) {
 	return uuidFromDB, nil
 }
 
-func (r Repository) Delete(uuid string) error {
-	sqlStatement := "DELETE FROM users.users WHERE uuid = $1;"
-	result, err := r.DB.Exec(sqlStatement, uuid)
+func (r Repository) Get(uuid string) (user models.DBModelUser, err error) {
+	sqlStatement := "SELECT * FROM users.users WHERE uuid = $1;"
+	err = r.DB.QueryRow(sqlStatement, uuid).Scan(&user.UUID, &user.Login, &user.Date)
 	if err != nil {
-		return err
+		return models.DBModelUser{}, err
 	}
 
-	err = checkResult(result)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return user, nil
 }
 
-func (r Repository) Update(user models.User) error {
+func (r Repository) Update(user models.RequestModelUser) error {
 	sqlStatement := "UPDATE users.users SET login = $1 WHERE uuid = $2;"
 	result, err := r.DB.Exec(sqlStatement, user.Login, user.UUID)
 	if err != nil {
 		return err
 	}
 
-	err = checkResult(result)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func checkResult(result sql.Result) error {
 	counter, err := result.RowsAffected()
 	if err != nil {
 		return err

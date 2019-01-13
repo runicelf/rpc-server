@@ -7,8 +7,8 @@ import (
 
 type Repository interface {
 	Add(login string) (string, error)
-	Delete(uuid string) error
-	Update(user models.User) error
+	Get(uuid string) (models.DBModelUser, error)
+	Update(user models.RequestModelUser) error
 }
 
 type Controller struct {
@@ -29,17 +29,17 @@ func (c *Controller) Add(r *http.Request, args *string, result *string) error {
 	return nil
 }
 
-func (c *Controller) Delete(r *http.Request, args *string, result *string) error {
-	err := c.Repository.Delete(*args)
+func (c *Controller) Get(r *http.Request, args *string, result *models.DBModelUser) error {
+	user, err := c.Repository.Get(*args)
 	if err != nil {
 		return err
 	}
 
-	*result = "ok"
+	*result = user
 	return nil
 }
 
-func (c *Controller) Update(r *http.Request, args *models.User, result *string) error {
+func (c *Controller) Update(r *http.Request, args *models.RequestModelUser, result *string) error {
 	err := c.Repository.Update(*args)
 	if err != nil {
 		return err
